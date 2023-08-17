@@ -1,51 +1,67 @@
-import json
-import spidev
 import time
+from sx127x import SX127x
+from sx127x import MODE
+from sx127x.adafruit_rfm9x import RFM9x
 
-#definição dos pinos do raspberry (não necessário por enquanto)
-fifoptraddr = 0x00
-localtxaddr = 0xBB
-destino = 0xBC
+# Configuração dos pinos SPI para o Raspberry Pi
+RADIO_SCK = 11
+RADIO_MOSI = 10
+RADIO_MISO = 9
+RADIO_CS = 8
+RADIO_RST = 25
+RADIO_DIO0 = 23
 
-#defina a função de setar a frequencia do Lora
-def set_freq(f):
-        i = int(f * 16384.)    # choose floor
-        msb = i // 65536
-        i -= msb * 65536
-        mid = i // 256
-        i -= mid * 256
-        lsb = i
-        return Lora.xfer([ 0x06 | 0x80, msb, mid, lsb])
-#Constantes que representam o modo de operação
-SLEEP    = 0x80
-STDBY    = 0x81
-FSTX     = 0x82
-TX       = 0x83
-FSRX     = 0x84
-RXCONT   = 0x85
-RXSINGLE = 0x86
-CAD      = 0x87
-FSK_STDBY= 0x01
-Lora = spidev.SpiDev()
-Lora.open(0,0)
-set_freq(915.0)
-Lora.xfer2([(0x01| STDBY)])
-Lora.xfer2([0x0E | 0x80, localtxaddr])
-Lora.xfer2([(fifoptraddr) | 0x80, localtxaddr])
-while True:
-    #dados = {
-    #    "nome": "Joao",
-    #    "idade": 30,
-    #    "cidade": "Sao Paulo"
-    #}
-    dados = "oi, esp32"
-    dados2 = json.dumps(dados)
-    payload = bytes(dados2, 'utf-8')
-    payload_length = [len(payload)]
-    Lora.xfer2([0xBC])
-    Lora.xfer([localtxaddr])
-    Lora.xfer2(payload_length)
-    Lora.xfer2(payload)
-    Lora.xfer2([(0x01)&0x7F | 0x83])
-    print("Enviando...\n")
-    time.sleep(2)
+# Configuração do dispositivo LoRa
+lora = RFM9x(RADIO_CS, RADIO_RST, RADIO_DIO0, RADIO_SCK, RADIO_MOSI, RADIO_MISO, None, None, None, 915.0)
+
+local_address = 0xBC
+msg_count = 0
+destination = 0xBB
+last_send_time = 0
+interval = 5  # Intervalo em segundos para envio das mensagens
+
+# Função para enviar uma mensagem LoRa
+def send_message(outgoing):
+    lora.set_mode(MODE.TX)
+    lora.write_byte(destination)
+    lora.write_byte(local_address)
+    lora.write_byte(msg_count)
+    lora.write_byte(len(outgoing))
+    lora.write(outgoing.encode())
+    lora.set_mode(MODE.RX)
+
+try:
+    while True:
+        if time.time() - last_send_time > interval:
+            mensagem = "Hi Supernova! :O"  # Definição da mensagem
+            send_message(mensagem)
+            print("Enviando:", mensagem)
+            last_send_time = time.time()
+        
+        # Verificar se há pacote recebido
+        if lora.packet_available():
+            packet = lora.receive_packet()
+            recipient, sender, incoming_msg_id, incoming_length, incoming = packet
+            incoming = incoming.decode()
+            
+            # Se o destinatário não for este dispositivo ou broadcast
+            if recipient != local_address and recipient != 0xFF:
+                print("Esta mensagem não é para mim.")
+                continue
+            
+            # Imprimir detalhes da mensagem recebida
+            print("Recebido do dispositivo:", hex(sender))
+            print("Enviado para:", hex(recipient))
+            print("ID da mensagem:", incoming_msg_id)
+            print("Tamanho da mensagem:", incoming_length)
+            print("Mensagem:", incoming)
+            print("RSSI:", lora.packet_rssi())
+            print("Snr:", lora.packet_snr())
+            print()
+            
+except KeyboardInterrupt:
+    pass
+
+finally:
+    lora.set_mode(MODE.SLEEP)
+    lora.cleanup()
