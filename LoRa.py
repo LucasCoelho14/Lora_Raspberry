@@ -33,14 +33,8 @@ Lora.xfer2([(0x01| STDBY)])
 Lora.xfer2([0x0E | 0x80, localtxaddr])
 Lora.xfer2([(fifoptraddr) | 0x80, localtxaddr])
 while True:
-    #dados = {
-    #    "nome": "Joao",
-    #    "idade": 30,
-    #    "cidade": "Sao Paulo"
-    #}
     dados = "oi, esp32"
-    dados2 = json.dumps(dados)
-    payload = bytes(dados2, 'utf-8')
+    payload = bytes(dados, 'utf-8')
     payload_length = [len(payload)]
     Lora.xfer2([0xBC])
     Lora.xfer([localtxaddr])
