@@ -1,43 +1,51 @@
-
+import json
 import spidev
 import time
 
-# SPI configuration
-spi = spidev.SpiDev()
-spi.open(0, 0)
-spi.max_speed_hz = 500000
+#definição dos pinos do raspberry (não necessário por enquanto)
+fifoptraddr = 0x00
+localtxaddr = 0xBB
+destino = 0xBC
 
-# LoRa parameters
-FREQUENCY = 915e6  # Set your frequency here
-SPREADING_FACTOR = 7  # Spreading factor (7 to 12)
-TX_POWER = 14  # Power level from 2 to 20
-
-# Message to send
-message = "Hello, LoRa!"
-
-# LoRa register addresses
-REG_FIFO = 0x00
-REG_OP_MODE = 0x01
-REG_FR_MSB = 0x06
-REG_FR_MID = 0x07
-REG_FR_LSB = 0x08
-REG_PA_CONFIG = 0x09
-REG_FIFO_TX_BASE_ADDR = 0x0E
-REG_FIFO_ADDR_PTR = 0x0D
-REG_PAYLOAD_LENGTH = 0x22
-REG_IRQ_FLAGS = 0x12
-REG_MODEM_CONFIG1 = 0x1D
-REG_MODEM_CONFIG2 = 0x1E
-
-# Initialize LoRa module
-def lora_reset():
-    pass  # Implement your reset logic here
-
-def set_mode(mode):
-    spi.xfer2([REG_OP_MODE | 0x80, mode])
-
-def write_register(address, value):
-    spi.xfer2([address | 0x80, value])
-
-# Reset LoRa module
-lora_reset
+#defina a função de setar a frequencia do Lora
+def set_freq(f):
+        i = int(f * 16384.)    # choose floor
+        msb = i // 65536
+        i -= msb * 65536
+        mid = i // 256
+        i -= mid * 256
+        lsb = i
+        return Lora.xfer([ 0x06 | 0x80, msb, mid, lsb])
+#Constantes que representam o modo de operação
+SLEEP    = 0x80
+STDBY    = 0x81
+FSTX     = 0x82
+TX       = 0x83
+FSRX     = 0x84
+RXCONT   = 0x85
+RXSINGLE = 0x86
+CAD      = 0x87
+FSK_STDBY= 0x01
+Lora = spidev.SpiDev()
+Lora.open(0,0)
+set_freq(915.0)
+Lora.xfer2([(0x01| STDBY)])
+Lora.xfer2([0x0E | 0x80, localtxaddr])
+Lora.xfer2([(fifoptraddr) | 0x80, localtxaddr])
+while True:
+    #dados = {
+    #    "nome": "Joao",
+    #    "idade": 30,
+    #    "cidade": "Sao Paulo"
+    #}
+    dados = "oi, esp32"
+    dados2 = json.dumps(dados)
+    payload = bytes(dados2, 'utf-8')
+    payload_length = [len(payload)]
+    Lora.xfer2([0xBC])
+    Lora.xfer([localtxaddr])
+    Lora.xfer2(payload_length)
+    Lora.xfer2(payload)
+    Lora.xfer2([(0x01)&0x7F | 0x83])
+    print("Enviando...\n")
+    time.sleep(2)
