@@ -1,27 +1,29 @@
+from sx127x import SX127x
+from sx127x.lib import config
+from sx127x.lib.rpi import GPIO
 import time
-from pyLoRa import LoRa
 
-# Configuração dos parâmetros LoRa
-frequency = 915E6  # Frequência 915MHz
-tx_power = 17     # Potência de transmissão (dBm)
+class LoRaSender(SX127x):
+    def __init__(self, parameters, verbose=False):
+        super(LoRaSender, self).__init__(parameters, verbose)
+        
+    def send(self, data):
+        self.set_mode('tx')
+        self.write_payload(data)
+        self.set_dio_mapping([0, 0, 0, 0])
+        self.clear_irq_flags()
+        self.send_pkt_len(len(data))
+        self.set_payload_length(len(data))
+        self.set_mode('tx')
+        while self.get_irq_flags()['tx_done'] == 0:
+            time.sleep(0.5)
 
-# Inicialização do módulo LoRa
-lora = LoRa(0, 0)  # Barramento SPI 0, Dispositivo 0
-lora.set_mode_sleep()  # Coloca o módulo em modo sleep para configurar
+GPIO.setmode(GPIO.BCM)
+lora = LoRaSender(channel=0, RST=22, verbose=False)
+lora.set_mode('sleep')
 
-lora.set_freq(frequency)
-lora.set_tx_power(tx_power)
-lora.set_mode_tx()  # Muda para o modo de transmissão
+message = "Hello, ESP32!"
+lora.send(message.encode())
 
-try:
-    message = "Oi"
-    
-    while True:
-        lora.send_packet_broadcast(message)
-        print("Enviando mensagem:", message)
-        time.sleep(5)  # Intervalo de envio da mensagem
-except KeyboardInterrupt:
-    pass
-
-finally:
-    lora.set_mode_sleep()  # Coloca o módulo de volta em modo sleep
+lora.set_mode('sleep')
+GPIO.cleanup()
