@@ -1,6 +1,5 @@
 import json
-
-# Criação de um pacote json imaginário para um teste
+# Criação de um json para teste
 dados = {
     "nome": "Joao",
     "idade": 30,
