@@ -1,7 +1,6 @@
 import RPi.GPIO as GPIO
 import time
 
-<<<<<<< HEAD
 # Configuração dos pinos GPIO para LoRa
 cs_pin = 8      # GPIO8 - NSS
 reset_pin = 22  # GPIO22 - NRESET
@@ -77,4 +76,3 @@ while True:
     Lora.xfer2([(0x01)&0x7F | 0x83])
     print("Enviando...\n")
     time.sleep(2)
->>>>>>> 734853292e8850781978dd7a772f70854207f4d6
