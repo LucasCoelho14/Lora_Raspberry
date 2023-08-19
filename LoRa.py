@@ -1,41 +1,27 @@
-import RPi.GPIO as GPIO
 import time
+from pyLoRa import LoRa
 
-# Configuração dos pinos GPIO para LoRa
-cs_pin = 8      # GPIO8 - NSS
-reset_pin = 22  # GPIO22 - NRESET
-dio0_pin = 4    # GPIO4 - DIO0
+# Configuração dos parâmetros LoRa
+frequency = 915E6  # Frequência 915MHz
+tx_power = 17     # Potência de transmissão (dBm)
 
-# Inicialização dos pinos GPIO
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(cs_pin, GPIO.OUT)
-GPIO.setup(reset_pin, GPIO.OUT)
-GPIO.setup(dio0_pin, GPIO.IN)
+# Inicialização do módulo LoRa
+lora = LoRa(0, 0)  # Barramento SPI 0, Dispositivo 0
+lora.set_mode_sleep()  # Coloca o módulo em modo sleep para configurar
 
-def check_lora_connection():
-    try:
-        # Ativa o pino CS para selecionar o dispositivo LoRa
-        GPIO.output(cs_pin, GPIO.LOW)
-        
-        # Aguarda um breve período para o módulo LoRa se estabilizar
-        time.sleep(0.1)
-        
-        # Desativa o pino CS para deselecionar o dispositivo LoRa
-        GPIO.output(cs_pin, GPIO.HIGH)
-        
-        # Se não houver exceções, considera o módulo LoRa como conectado
-        return True
-    except:
-        return False
+lora.set_freq(frequency)
+lora.set_tx_power(tx_power)
+lora.set_mode_tx()  # Muda para o modo de transmissão
 
 try:
-    if check_lora_connection():
-        print("Módulo LoRa está conectado!")
-    else:
-        print("Não foi possível verificar a conexão com o módulo LoRa.")
-        
+    message = "Oi"
+    
+    while True:
+        lora.send_packet_broadcast(message)
+        print("Enviando mensagem:", message)
+        time.sleep(5)  # Intervalo de envio da mensagem
 except KeyboardInterrupt:
     pass
 
 finally:
-    GPIO.cleanup()  # Limpeza dos pinos GPIO
+    lora.set_mode_sleep()  # Coloca o módulo de volta em modo sleep
