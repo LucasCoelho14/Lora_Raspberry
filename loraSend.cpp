@@ -15,7 +15,23 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 
-#define UDP_PORT 1234
+// #include <string>
+// #include <stdio.h>
+// #include <sys/types.h>
+// #include <sys/socket.h>
+// #include <arpa/inet.h>
+// #include <string.h>
+// #include <sys/time.h>
+// #include <signal.h>
+// #include <stdlib.h>
+// #include <sys/ioctl.h>
+// #include <wiringPi.h>
+// #include <wiringPiSPI.h>
+
+
+// #############################################
+// #############################################
+
 #define REG_FIFO                    0x00
 #define REG_OPMODE                  0x01
 #define REG_FIFO_ADDR_PTR           0x0D
@@ -40,7 +56,7 @@
 
 #define PAYLOAD_LENGTH              0x40
 
-//LOW NOISE AMPLIFIER
+// LOW NOISE AMPLIFIER
 #define REG_LNA                     0x0C
 #define LNA_MAX_GAIN                0x23
 #define LNA_OFF_GAIN                0x00
@@ -134,8 +150,6 @@
 // #############################################
 // #############################################
 //
-//const int udpPort = 1234;
-//int udpSocket;
 typedef bool boolean;
 typedef unsigned char byte;
 
@@ -149,6 +163,12 @@ byte receivedbytes;
 
 enum sf_t { SF7=7, SF8, SF9, SF10, SF11, SF12 };
 
+/*******************************************************************************
+ *
+ * Configure these values!
+ *
+ *******************************************************************************/
+
 // SX1272 - Raspberry connections
 int ssPin = 8; //GPIO8
 int dio0  = 4; //GPIO4
@@ -158,24 +178,9 @@ int RST   = 22; //GPIO22
 sf_t sf = SF7;
 
 // Set center frequency
-uint32_t  freq = 915000000; // (915) Mhz
+uint32_t  freq = 915000000; // in Mhz! (868.1)
+
 byte hello[32] = "HELLO";
-//int experimento0 = 250;
-//int experimento1 = 2;
-//int bateria = 86;
-//float temperatura = 19;
-//float pressao = 909.25
-// String JSON manual
-//String jsonString = "{";
-//jsonString += "\"equipe\": 5242,";
-//jsonString += "\"bateria\":" + String(bateria)+ ",";
-//jsonString += "\"temperatura\":" + String(temperatura) + ",";
-//jsonString += "\"pressao\":" + String(pressao) + ",";
-//jsonString += "\"giroscopio\": [" + String(g.gyro.x) + "," + String(g.gyro.y) + "," + String(g.gyro.z) + "],";
-//jsonString += "\"acelerometro\":[" + String(a.acceleration.x) + "," + String(a.acceleration.y) + "," + String(a.acceleration.z) + "],";
-//jsonString += "\"payload\": [" + String(experimento0) + "," + String(experimento1) + "]";
-//jsonString += "}";
-//byte hello[32] = jsonString;
 
 void die(const char *s)
 {
@@ -428,8 +433,7 @@ void txlora(byte *frame, byte datalen) {
 }
 
 int main (int argc, char *argv[]) {
-    
-    //Lora sender
+
     if (argc < 2) {
         printf ("Usage: argv[0] sender|rec [message]\n");
         exit(1);
@@ -445,7 +449,6 @@ int main (int argc, char *argv[]) {
     SetupLoRa();
 
     if (!strcmp("sender", argv[1])) {
-        //LoRa sending string
         opmodeLora();
         // enter standby mode (required for FIFO loading))
         opmode(OPMODE_STANDBY);
@@ -453,7 +456,7 @@ int main (int argc, char *argv[]) {
         writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); // set PA ramp-up time 50 uSec
 
         configPower(23);
-          
+
         printf("Send packets at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
         printf("------------------\n");
 
