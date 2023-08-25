@@ -1,3 +1,5 @@
+#include <Arduino.h>
+#include <ArduinoJson.h>
 #include <string>
 #include <stdio.h>
 #include <sys/types.h>
@@ -129,6 +131,7 @@
 // #############################################
 // #############################################
 //
+
 typedef bool boolean;
 typedef unsigned char byte;
 
