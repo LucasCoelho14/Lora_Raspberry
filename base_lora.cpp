@@ -404,11 +404,11 @@ static void writeBuf(byte addr, byte *value, byte len) {
     unselectreceiver();                                                                                 
 }
 
-void txlora(const char *jsonString, byte datalen) {
-    byte frame[256]; // Make sure this is large enough to hold the JSON string and other data
-    
+void txlora(byte *frame, byte datalen) {
+
+    //byte frame[256]; // Make sure this is large enough to hold the JSON string and other data    
     // Convert the JSON string to bytes
-    strncpy((char *)frame, jsonString, datalen);
+    //strncpy((char *)frame, jsonString, datalen);
     
     // set the IRQ mapping DIO0=TxDone DIO1=NOP DIO2=NOP
     writeReg(RegDioMapping1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);
@@ -472,7 +472,7 @@ int main (int argc, char *argv[]) {
 
     if (!strcmp("sender", argv[1])) {
         //UDP receiving string
-        char buffer[256];
+        //char buffer[256];
         struct sockaddr_in clientAddr;
         socklen_t clientAddrLen = sizeof(clientAddr);
 
@@ -496,13 +496,19 @@ int main (int argc, char *argv[]) {
         
         printf("Send packets at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
         printf("------------------\n");
-        
         if (argc > 2)
+            strncpy((char *)hello, argv[2], sizeof(hello));
+
+        while(1) {
+            txlora(hello, strlen((char *)hello));
+            delay(5000);
+            
+        //if (argc > 2)
             //strncpy((char *)buffer, argv[2], sizeof(buffer));
 
         //while(1) {
             //txlora(jsonDataBytes, strlen((char *)jsonDataBytes));
-            txlora(buffer, strlen(buffer)); // Send the JSON string
+        //    txlora(buffer, strlen(buffer)); // Send the JSON string
             //delay(5000);
         //}
     } else {
