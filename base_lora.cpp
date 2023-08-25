@@ -166,16 +166,15 @@ int bateria = 86;
 float temperatura = 19;
 float pressao = 909.25
 // String JSON manual
-String jsonString = "{";
-jsonString += "\"equipe\": 5242,";
+//String jsonString = "{";
+//jsonString += "\"equipe\": 5242,";
 //jsonString += "\"bateria\":" + String(bateria)+ ",";
 //jsonString += "\"temperatura\":" + String(temperatura) + ",";
 //jsonString += "\"pressao\":" + String(pressao) + ",";
 //jsonString += "\"giroscopio\": [" + String(g.gyro.x) + "," + String(g.gyro.y) + "," + String(g.gyro.z) + "],";
 //jsonString += "\"acelerometro\":[" + String(a.acceleration.x) + "," + String(a.acceleration.y) + "," + String(a.acceleration.z) + "],";
 //jsonString += "\"payload\": [" + String(experimento0) + "," + String(experimento1) + "]";
-jsonString += "}";
-byte hello[32] = jsonString;
+//jsonString += "}";
 
 void die(const char *s)
 {
@@ -480,6 +479,7 @@ int main (int argc, char *argv[]) {
             buffer[bytesRead] = '\0';
             printf("Received from %s: %s\n", inet_ntoa(clientAddr.sin_addr), buffer);
         }
+        byte hello[64] = buffer;
         //LoRa sending string
         opmodeLora();
         // enter standby mode (required for FIFO loading))
@@ -491,12 +491,12 @@ int main (int argc, char *argv[]) {
           
         printf("Send packets at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
         printf("------------------\n");
-
+        
         if (argc > 2)
             strncpy((char *)hello, argv[2], sizeof(hello));
 
         while(1) {
-            txlora(buffer, strlen((char *)buffer));
+            txlora(hello, strlen((char *)hello));
             delay(5000);
         }
     } else {
