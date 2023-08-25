@@ -479,7 +479,7 @@ int main (int argc, char *argv[]) {
             buffer[bytesRead] = '\0';
             printf("Received from %s: %s\n", inet_ntoa(clientAddr.sin_addr), buffer);
         }
-        byte hello[64] = {buffer};
+        byte hello[64] = (byte *)buffer;
         //LoRa sending string
         opmodeLora();
         // enter standby mode (required for FIFO loading))
@@ -488,7 +488,7 @@ int main (int argc, char *argv[]) {
         writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); // set PA ramp-up time 50 uSec
 
         configPower(23);
-          
+        
         printf("Send packets at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
         printf("------------------\n");
         
