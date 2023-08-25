@@ -154,8 +154,22 @@ sf_t sf = SF7;
 
 // Set center frequency
 uint32_t  freq = 915000000; // (915) Mhz
-
-byte hello[32] = "HELLO";
+int experimento0 = 250;
+int experimento1 = 2;
+int bateria = 86;
+float temperatura = 19;
+float pressao = 909.25
+// String JSON manual
+String jsonString = "{";
+jsonString += "\"equipe\": 5242,";
+//jsonString += "\"bateria\":" + String(bateria)+ ",";
+//jsonString += "\"temperatura\":" + String(temperatura) + ",";
+//jsonString += "\"pressao\":" + String(pressao) + ",";
+//jsonString += "\"giroscopio\": [" + String(g.gyro.x) + "," + String(g.gyro.y) + "," + String(g.gyro.z) + "],";
+//jsonString += "\"acelerometro\":[" + String(a.acceleration.x) + "," + String(a.acceleration.y) + "," + String(a.acceleration.z) + "],";
+//jsonString += "\"payload\": [" + String(experimento0) + "," + String(experimento1) + "]";
+jsonString += "}";
+byte hello[32] = jsonString;
 
 void die(const char *s)
 {
@@ -431,7 +445,7 @@ int main (int argc, char *argv[]) {
         writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); // set PA ramp-up time 50 uSec
 
         configPower(23);
-
+          
         printf("Send packets at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
         printf("------------------\n");
 
