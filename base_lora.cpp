@@ -498,11 +498,11 @@ int main (int argc, char *argv[]) {
         printf("------------------\n");
         
         if (argc > 2)
-            strncpy((char *)buffer, argv[2], sizeof(buffer));
+            //strncpy((char *)buffer, argv[2], sizeof(buffer));
 
         //while(1) {
             //txlora(jsonDataBytes, strlen((char *)jsonDataBytes));
-        txlora(buffer, strlen(buffer)); // Send the JSON string
+            txlora(buffer, strlen(buffer)); // Send the JSON string
             //delay(5000);
         //}
     } else {
