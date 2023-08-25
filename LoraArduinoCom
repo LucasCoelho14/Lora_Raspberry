@@ -100,7 +100,7 @@ void loop()
   // verifica se temos o intervalo de tempo para enviar uma mensagem
   if (millis() - lastSendTime > interval) 
   {
-    String mensagem = "Hi Supernova! :O ";    // Definicao da mensagem 
+    String mensagem = "Ei, Supernova! :O ";    // Definicao da mensagem 
     sendMessage(mensagem);
     Serial.println("Enviando " + mensagem);
     lastSendTime = millis();            // Timestamp da ultima mensagem
