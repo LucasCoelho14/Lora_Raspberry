@@ -1,7 +1,7 @@
 // Comunicação LoRa com Arduino
 // Definicao das bibliotecas a serem utilizadas no projeto
-#include <SPI.h>             
-#include <LoRa.h>
+#include SPI.h            
+#include LoRa.h
  
 // Definicacao de constantes
 const int csPin = 8;         // Chip Select (Slave Select do protocolo SPI) do modulo Lora 0 //GPIO8 ssPin = 8;
