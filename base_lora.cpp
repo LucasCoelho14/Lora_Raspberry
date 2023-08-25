@@ -503,7 +503,7 @@ int main (int argc, char *argv[]) {
         while(1) {
             txlora(hello, strlen((char *)hello));
             delay(5000);
-            
+        }
         //if (argc > 2)
             //strncpy((char *)buffer, argv[2], sizeof(buffer));
 
