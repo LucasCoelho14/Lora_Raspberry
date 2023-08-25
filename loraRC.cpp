@@ -10,7 +10,12 @@
 #include <sys/ioctl.h>
 #include <wiringPi.h>
 #include <wiringPiSPI.h>
+#include <stdio.h>
+#include <string.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
+#define UDP_PORT 1234
 #define REG_FIFO                    0x00
 #define REG_OPMODE                  0x01
 #define REG_FIFO_ADDR_PTR           0x0D
@@ -129,7 +134,9 @@
 // #############################################
 // #############################################
 //
+const int udpPort = 1234;
 
+int udpSocket;
 typedef bool boolean;
 typedef unsigned char byte;
 
@@ -421,7 +428,31 @@ void txlora(byte *frame, byte datalen) {
 }
 
 int main (int argc, char *argv[]) {
+    //WIFI-UDP packet
+    printf("Initializing WiringPi...\n");
+    wiringPiSetup();
 
+    printf("Creating UDP socket...\n");
+    udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (udpSocket == -1) {
+        perror("socket");
+        return 1;
+    }
+
+    struct sockaddr_in serverAddr;
+    memset(&serverAddr, 0, sizeof(serverAddr));
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(udpPort);
+    serverAddr.sin_addr.s_addr = INADDR_ANY;
+
+    if (bind(udpSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1) {
+        perror("bind");
+        return 1;
+    }
+
+    printf("UDP listener started on port %d\n", udpPort);
+
+    //Lora sender
     if (argc < 2) {
         printf ("Usage: argv[0] sender|rec [message]\n");
         exit(1);
@@ -437,6 +468,19 @@ int main (int argc, char *argv[]) {
     SetupLoRa();
 
     if (!strcmp("sender", argv[1])) {
+        //UDP receiving string
+        char buffer[256];
+        struct sockaddr_in clientAddr;
+        socklen_t clientAddrLen = sizeof(clientAddr);
+
+        int bytesRead = recvfrom(udpSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clientAddr, &clientAddrLen);
+        if (bytesRead == -1) {
+            perror("recvfrom");
+        } else {
+            buffer[bytesRead] = '\0';
+            printf("Received from %s: %s\n", inet_ntoa(clientAddr.sin_addr), buffer);
+        }
+        //LoRa sending string
         opmodeLora();
         // enter standby mode (required for FIFO loading))
         opmode(OPMODE_STANDBY);
@@ -452,7 +496,7 @@ int main (int argc, char *argv[]) {
             strncpy((char *)hello, argv[2], sizeof(hello));
 
         while(1) {
-            txlora(hello, strlen((char *)hello));
+            txlora(buffer, strlen((char *)buffer));
             delay(5000);
         }
     } else {
