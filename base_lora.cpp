@@ -160,6 +160,7 @@ sf_t sf = SF7;
 
 // Set center frequency
 uint32_t  freq = 915000000; // (915) Mhz
+byte hello[32] = "HELLO";
 //int experimento0 = 250;
 //int experimento1 = 2;
 //int bateria = 86;
@@ -472,7 +473,7 @@ int main (int argc, char *argv[]) {
 
     if (!strcmp("sender", argv[1])) {
         //UDP receiving string
-        //char buffer[256];
+        char buffer[256];
         struct sockaddr_in clientAddr;
         socklen_t clientAddrLen = sizeof(clientAddr);
 
