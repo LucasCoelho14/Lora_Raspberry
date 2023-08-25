@@ -404,8 +404,13 @@ static void writeBuf(byte addr, byte *value, byte len) {
     unselectreceiver();                                                                                 
 }
 
-void txlora(byte *frame, byte datalen) {
-
+void txlora(const char *jsonString) {
+    byte frame[256]; // Make sure this is large enough to hold the JSON string and other data
+    
+    // Convert the JSON string to bytes
+    size_t jsonLength = strlen(jsonString);
+    strncpy((char *)frame, jsonString, jsonLength);
+    
     // set the IRQ mapping DIO0=TxDone DIO1=NOP DIO2=NOP
     writeReg(RegDioMapping1, MAP_DIO0_LORA_TXDONE|MAP_DIO1_LORA_NOP|MAP_DIO2_LORA_NOP);
     // clear all radio IRQ flags
@@ -495,10 +500,11 @@ int main (int argc, char *argv[]) {
         printf("------------------\n");
         
         if (argc > 2)
-            strncpy((char *)jsonDataBytes, argv[2], sizeof(jsonDataBytes));
+            strncpy((char *)buffer, argv[2], sizeof(buffer));
 
         while(1) {
-            txlora(jsonDataBytes, strlen((char *)jsonDataBytes));
+            //txlora(jsonDataBytes, strlen((char *)jsonDataBytes));
+            txlora(buffer.c_str()); // Send the JSON string
             delay(5000);
         }
     } else {
