@@ -160,11 +160,11 @@ sf_t sf = SF7;
 
 // Set center frequency
 uint32_t  freq = 915000000; // (915) Mhz
-int experimento0 = 250;
-int experimento1 = 2;
-int bateria = 86;
-float temperatura = 19;
-float pressao = 909.25
+//int experimento0 = 250;
+//int experimento1 = 2;
+//int bateria = 86;
+//float temperatura = 19;
+//float pressao = 909.25
 // String JSON manual
 //String jsonString = "{";
 //jsonString += "\"equipe\": 5242,";
@@ -479,7 +479,7 @@ int main (int argc, char *argv[]) {
             buffer[bytesRead] = '\0';
             printf("Received from %s: %s\n", inet_ntoa(clientAddr.sin_addr), buffer);
         }
-        byte hello[64] = buffer;
+        byte hello[64] = {buffer};
         //LoRa sending string
         opmodeLora();
         // enter standby mode (required for FIFO loading))
