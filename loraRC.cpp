@@ -1,4 +1,3 @@
-#include <ArduinoJson.h>
 #include <string>
 #include <stdio.h>
 #include <sys/types.h>
