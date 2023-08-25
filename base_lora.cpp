@@ -453,7 +453,7 @@ int main (int argc, char *argv[]) {
 
     //Lora sender
     if (argc < 2) {
-        printf ("Usage: argv[0] sender|rec [message]\n");
+        printf ("Usage: [0] sender|rec [message]\n");
         exit(1);
     }
 
@@ -479,7 +479,9 @@ int main (int argc, char *argv[]) {
             buffer[bytesRead] = '\0';
             printf("Received from %s: %s\n", inet_ntoa(clientAddr.sin_addr), buffer);
         }
-        byte hello[64] = (byte *)buffer;
+        //byte hello[64] = (byte *)buffer;
+        // Convert the JSON string to a byte array
+        const byte *jsonDataBytes = (const byte *)buffer;
         //LoRa sending string
         opmodeLora();
         // enter standby mode (required for FIFO loading))
@@ -493,10 +495,10 @@ int main (int argc, char *argv[]) {
         printf("------------------\n");
         
         if (argc > 2)
-            strncpy((char *)hello, argv[2], sizeof(hello));
+            strncpy((char *)jsonDataBytes, argv[2], sizeof(jsonDataBytes));
 
         while(1) {
-            txlora(hello, strlen((char *)hello));
+            txlora(jsonDataBytes, strlen((char *)jsonDataBytes));
             delay(5000);
         }
     } else {
