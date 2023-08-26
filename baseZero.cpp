@@ -161,7 +161,18 @@ int RST   = 22; //GPIO22
 sf_t sf = SF7;
 
 // Set center frequency
-uint32_t  freq = 915000000; // in Mhz! (868.1)
+uint32_t  freq = 915000000; // 915 Mhz
+// String JSON manual
+String jsonString = "{";
+jsonString += "\"equipe\": 5242,";
+jsonString += "\"bateria\":" + String(bateria)+ ",";
+jsonString += "}";
+//jsonString += "\"temperatura\":" + String(temperatura) + ",";
+//jsonString += "\"pressao\":" + String(pressao) + ",";
+//jsonString += "\"giroscopio\": [" + String(g.gyro.x) + "," + String(g.gyro.y) + "," + String(g.gyro.z) + "],";
+//jsonString += "\"acelerometro\":[" + String(a.acceleration.x) + "," + String(a.acceleration.y) + "," + String(a.acceleration.z) + "],";
+//jsonString += "\"payload\": [" + String(experimento0) + "," + String(experimento1) + "]";
+// jsonString += "}";
 
 byte hello[32] = "HELLO";
 
@@ -417,7 +428,11 @@ void txlora(byte *frame, byte datalen) {
 
 int main () {
     //int argc, char *argv[]
-  
+    byte jsonPayload[256];
+    memcpy(jsonPayload, jsonString.c_str(), jsonString.length());
+    // Convert the JSON payload length to byte (assuming jsonString.length() is less than 256)
+    byte payloadLength = static_cast<byte>(jsonString.length());
+    
     wiringPiSetup () ;
     pinMode(ssPin, OUTPUT);
     pinMode(dio0, INPUT);
@@ -430,7 +445,8 @@ int main () {
     printf("------------------\n");
     
     while(1){
-        txlora(hello, strlen((char *)hello));
+        //txlora(hello, strlen((char *)hello));
+        txlora(jsonPayload, payloadLength);
         delay(250);
     }
     return (0);
