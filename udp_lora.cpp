@@ -442,37 +442,29 @@ int main () {
     pinMode(RST, OUTPUT);
     wiringPiSPISetup(CHANNEL, 500000);
     SetupLoRa();
-
-    //UDP receiving string
-    char buffer[256];
-    struct sockaddr_in clientAddr;
-    socklen_t clientAddrLen = sizeof(clientAddr);
-    int bytesRead = recvfrom(udpSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clientAddr, &clientAddrLen);
-    if (bytesRead == -1) {
-        perror("recvfrom");
-    } else {
-        buffer[bytesRead] = '\0';
-        printf("Received from %s: %s\n", inet_ntoa(clientAddr.sin_addr), buffer);
-        }
-    
-    byte jsonPayload[256];
-    memcpy(jsonPayload, buffer, strlen(buffer));
-
-    // Convert the JSON payload length to byte (assuming jsonString.length() is less than 256)
-    byte payloadLength = static_cast<byte>(strlen(buffer));
-    
-    
-    opmodeLora();
-    
-    // enter standby mode (required for FIFO loading))
-    opmode(OPMODE_STANDBY);
-    writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); // set PA ramp-up time 50 uSec
-    configPower(23);
-    
     printf("Send packets at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
     printf("------------------\n");
-
     while(1) {
+        //UDP receiving string
+        char buffer[256];
+        byte jsonPayload[256];
+        struct sockaddr_in clientAddr;
+        socklen_t clientAddrLen = sizeof(clientAddr);
+        int bytesRead = recvfrom(udpSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clientAddr, &clientAddrLen);
+        if (bytesRead == -1) {
+            perror("recvfrom");
+        } else {
+            buffer[bytesRead] = '\0';
+            printf("Received from %s: %s\n", inet_ntoa(clientAddr.sin_addr), buffer);
+            }
+        memcpy(jsonPayload, buffer, strlen(buffer));
+        // Convert the JSON payload length to byte (assuming jsonString.length() is less than 256)
+        byte payloadLength = static_cast<byte>(strlen(buffer));
+        opmodeLora();
+        // enter standby mode (required for FIFO loading))
+        opmode(OPMODE_STANDBY);
+        writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); // set PA ramp-up time 50 uSec
+        configPower(23);
         txlora(jsonPayload, payloadLength);
         delay(250);
     }
