@@ -161,21 +161,6 @@ sf_t sf = SF7;
 // Set center frequency
 uint32_t  freq = 915000000; // (915) Mhz
 byte hello[32] = "HELLO";
-//int experimento0 = 250;
-//int experimento1 = 2;
-//int bateria = 86;
-//float temperatura = 19;
-//float pressao = 909.25
-// String JSON manual
-//String jsonString = "{";
-//jsonString += "\"equipe\": 5242,";
-//jsonString += "\"bateria\":" + String(bateria)+ ",";
-//jsonString += "\"temperatura\":" + String(temperatura) + ",";
-//jsonString += "\"pressao\":" + String(pressao) + ",";
-//jsonString += "\"giroscopio\": [" + String(g.gyro.x) + "," + String(g.gyro.y) + "," + String(g.gyro.z) + "],";
-//jsonString += "\"acelerometro\":[" + String(a.acceleration.x) + "," + String(a.acceleration.y) + "," + String(a.acceleration.z) + "],";
-//jsonString += "\"payload\": [" + String(experimento0) + "," + String(experimento1) + "]";
-//jsonString += "}";
 
 void die(const char *s)
 {
@@ -431,101 +416,76 @@ void txlora(byte *frame, byte datalen) {
     printf("send: %s\n", frame);
 }
 
-int main (int argc, char *argv[]) {
+int main () {
     //WIFI-UDP packet
     printf("Initializing WiringPi...\n");
     wiringPiSetup();
-
     printf("Creating UDP socket...\n");
     udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    
     if (udpSocket == -1) {
         perror("socket");
-        return 1;
-    }
-
+        return 1;}
     struct sockaddr_in serverAddr;
     memset(&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(udpPort);
     serverAddr.sin_addr.s_addr = INADDR_ANY;
-
     if (bind(udpSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1) {
         perror("bind");
-        return 1;
-    }
-
+        return 1;}
     printf("UDP listener started on port %d\n", udpPort);
-
     //Lora sender
-    if (argc < 2) {
-        printf ("Usage: [0] sender|rec [message]\n");
-        exit(1);
-    }
-
     wiringPiSetup () ;
     pinMode(ssPin, OUTPUT);
     pinMode(dio0, INPUT);
     pinMode(RST, OUTPUT);
-
     wiringPiSPISetup(CHANNEL, 500000);
-
     SetupLoRa();
 
-    if (!strcmp("sender", argv[1])) {
-        //UDP receiving string
-        char buffer[256];
-        struct sockaddr_in clientAddr;
-        socklen_t clientAddrLen = sizeof(clientAddr);
-
-        int bytesRead = recvfrom(udpSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clientAddr, &clientAddrLen);
-        if (bytesRead == -1) {
-            perror("recvfrom");
-        } else {
-            buffer[bytesRead] = '\0';
-            printf("Received from %s: %s\n", inet_ntoa(clientAddr.sin_addr), buffer);
-        }
-        //byte hello[64] = (byte *)buffer;
-        // Convert the JSON string to a byte array
-        //LoRa sending string
-        opmodeLora();
-        // enter standby mode (required for FIFO loading))
-        opmode(OPMODE_STANDBY);
-
-        writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); // set PA ramp-up time 50 uSec
-
-        configPower(23);
-        
-        printf("Send packets at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
-        printf("------------------\n");
-        if (argc > 2)
-            strncpy((char *)hello, argv[2], sizeof(hello));
-
-        while(1) {
-            txlora(hello, strlen((char *)hello));
-            delay(5000);
-        }
-        //if (argc > 2)
-            //strncpy((char *)buffer, argv[2], sizeof(buffer));
-
-        //while(1) {
-            //txlora(jsonDataBytes, strlen((char *)jsonDataBytes));
-        //    txlora(buffer, strlen(buffer)); // Send the JSON string
-            //delay(5000);
-        //}
+    //UDP receiving string
+    char buffer[256];
+    struct sockaddr_in clientAddr;
+    socklen_t clientAddrLen = sizeof(clientAddr);
+    int bytesRead = recvfrom(udpSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clientAddr, &clientAddrLen);
+    if (bytesRead == -1) {
+        perror("recvfrom");
     } else {
-
-        // radio init
-        opmodeLora();
-        opmode(OPMODE_STANDBY);
-        opmode(OPMODE_RX);
-        printf("Listening at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
-        printf("------------------\n");
-        while(1) {
-            receivepacket(); 
-            delay(1);
+        buffer[bytesRead] = '\0';
+        printf("Received from %s: %s\n", inet_ntoa(clientAddr.sin_addr), buffer);
         }
+    
+    byte jsonPayload[256];
+    memcpy(jsonPayload, buffer, strlen(buffer));
 
+    // Convert the JSON payload length to byte (assuming jsonString.length() is less than 256)
+    byte payloadLength = static_cast<byte>(strlen(jsonString));
+    
+    
+    opmodeLora();
+    
+    // enter standby mode (required for FIFO loading))
+    opmode(OPMODE_STANDBY);
+    writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); // set PA ramp-up time 50 uSec
+    configPower(23);
+    
+    printf("Send packets at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
+    printf("------------------\n");
+
+    while(1) {
+        txlora(jsonPayload, payloadLength);
+        delay(250);
     }
+    
+    //if (argc > 2)
+        //strncpy((char *)buffer, argv[2], sizeof(buffer));
+
+    //while(1) {
+        //txlora(jsonDataBytes, strlen((char *)jsonDataBytes));
+    //    txlora(buffer, strlen(buffer)); // Send the JSON string
+        //delay(5000);
+    //}
+    
 
     return (0);
 }
