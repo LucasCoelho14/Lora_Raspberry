@@ -459,7 +459,7 @@ int main () {
     memcpy(jsonPayload, buffer, strlen(buffer));
 
     // Convert the JSON payload length to byte (assuming jsonString.length() is less than 256)
-    byte payloadLength = static_cast<byte>(strlen(jsonString));
+    byte payloadLength = static_cast<byte>(strlen(buffer));
     
     
     opmodeLora();
