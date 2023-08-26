@@ -431,9 +431,10 @@ int main () {
     //int argc, char *argv[]
     
     byte jsonPayload[256];
-    memcpy(jsonPayload, jsonString.c_str(), jsonString.length());
+    memcpy(jsonPayload, jsonString, strlen(jsonString));
+
     // Convert the JSON payload length to byte (assuming jsonString.length() is less than 256)
-    byte payloadLength = static_cast<byte>(jsonString.length());
+    byte payloadLength = static_cast<byte>(strlen(jsonString));
     
     wiringPiSetup () ;
     pinMode(ssPin, OUTPUT);
