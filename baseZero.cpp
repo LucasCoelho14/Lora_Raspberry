@@ -426,9 +426,12 @@ int main () {
     wiringPiSPISetup(CHANNEL, 500000);
 
     SetupLoRa();
-
-    txlora(hello, strlen((char *)hello));
-    delay(5000);
-
+    printf("Send packets at SF%i on %.6lf Mhz.\n", sf,(double)freq/1000000);
+    printf("------------------\n");
+    
+    while(1){
+        txlora(hello, strlen((char *)hello));
+        delay(5000);
+    }
     return (0);
 }
