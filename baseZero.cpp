@@ -163,10 +163,10 @@ sf_t sf = SF7;
 // Set center frequency
 uint32_t  freq = 915000000; // 915 Mhz
 // String JSON manual
-String jsonString = "{";
-jsonString += "\"equipe\": 5242,";
-jsonString += "\"bateria\":" + String(bateria)+ ",";
-jsonString += "}";
+// String jsonString = "{";
+// jsonString += "\"equipe\": 5242,";
+// jsonString += "\"bateria\":" + String(bateria)+ ",";
+// jsonString += "}";
 //jsonString += "\"temperatura\":" + String(temperatura) + ",";
 //jsonString += "\"pressao\":" + String(pressao) + ",";
 //jsonString += "\"giroscopio\": [" + String(g.gyro.x) + "," + String(g.gyro.y) + "," + String(g.gyro.z) + "],";
@@ -428,6 +428,7 @@ void txlora(byte *frame, byte datalen) {
 
 int main () {
     //int argc, char *argv[]
+    String jsonString = "{\"equipe\": 5242,\"bateria\": 80}";  // Modify this JSON string as needed
     byte jsonPayload[256];
     memcpy(jsonPayload, jsonString.c_str(), jsonString.length());
     // Convert the JSON payload length to byte (assuming jsonString.length() is less than 256)
