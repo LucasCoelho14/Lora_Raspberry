@@ -431,7 +431,7 @@ int main () {
     
     while(1){
         txlora(hello, strlen((char *)hello));
-        delay(5000);
+        //delay(5000);
     }
     return (0);
 }
