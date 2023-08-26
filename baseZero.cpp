@@ -162,7 +162,7 @@ sf_t sf = SF7;
 
 // Set center frequency
 uint32_t  freq = 915000000; // 915 Mhz
-String jsonString = "{\"equipe\": 5242,\"bateria\": 80}";  // Modify this JSON string as needed
+char jsonString[] = "{\"equipe\": 5242,\"bateria\": 80}";  // Modify this JSON string as needed
 // String JSON manual
 // String jsonString = "{";
 // jsonString += "\"equipe\": 5242,";
