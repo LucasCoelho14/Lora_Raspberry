@@ -446,8 +446,8 @@ int main () {
     printf("------------------\n");
     while(1) {
         //UDP receiving string
-        char buffer[256];
-        byte jsonPayload[256];
+        char buffer[512]; //256 is the right size. Changed for test.
+        byte jsonPayload[512]; //256 is the right size
         struct sockaddr_in clientAddr;
         socklen_t clientAddrLen = sizeof(clientAddr);
         int bytesRead = recvfrom(udpSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clientAddr, &clientAddrLen);
@@ -464,7 +464,7 @@ int main () {
         // enter standby mode (required for FIFO loading))
         opmode(OPMODE_STANDBY);
         writeReg(RegPaRamp, (readReg(RegPaRamp) & 0xF0) | 0x08); // set PA ramp-up time 50 uSec
-        configPower(23);
+        configPower(20);
         txlora(jsonPayload, payloadLength);
         delay(250);
     }
