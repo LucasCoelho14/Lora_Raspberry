@@ -142,7 +142,7 @@ typedef unsigned char byte;
 
 static const int CHANNEL = 0;
 
-char message[300];
+char message[256];
 
 bool sx1272 = true;
 
@@ -380,7 +380,7 @@ static void configPower (int8_t pw) {
 
 
 static void writeBuf(byte addr, byte *value, byte len) {                                                       
-    unsigned char spibuf[300];                                                                          
+    unsigned char spibuf[256];                                                                          
     spibuf[0] = addr | 0x80;                                                                            
     for (int i = 0; i < len; i++) {                                                                         
         spibuf[i + 1] = value[i];                                                                       
@@ -446,8 +446,8 @@ int main () {
     printf("------------------\n");
     while(1) {
         //UDP receiving string
-        char buffer[300]; //256 is the right size. Changed for test.
-        byte jsonPayload[300]; //256 is the right size
+        char buffer[256]; //256 is the right size. Changed for test.
+        byte jsonPayload[256]; //256 is the right size
         struct sockaddr_in clientAddr;
         socklen_t clientAddrLen = sizeof(clientAddr);
         int bytesRead = recvfrom(udpSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clientAddr, &clientAddrLen);
