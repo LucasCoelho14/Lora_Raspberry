@@ -446,8 +446,8 @@ int main () {
     printf("------------------\n");
     while(1) {
         //UDP receiving string
-        char buffer[512]; //256 is the right size. Changed for test.
-        byte jsonPayload[512]; //256 is the right size
+        char buffer[256]; //256 is the right size. Changed for test.
+        byte jsonPayload[256]; //256 is the right size
         struct sockaddr_in clientAddr;
         socklen_t clientAddrLen = sizeof(clientAddr);
         int bytesRead = recvfrom(udpSocket, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&clientAddr, &clientAddrLen);
