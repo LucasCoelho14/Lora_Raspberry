@@ -159,7 +159,7 @@ int RST   = 22; //GPIO22
 sf_t sf = SF7;
 
 // Set center frequency
-uint32_t  freq = 927500000; // (915) Mhz
+uint32_t  freq = 927500000; // (927.5) Mhz
 byte hello[32] = "HELLO";
 
 void die(const char *s)
